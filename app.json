@@ -1,53 +1,59 @@
 {
-    "expo": {
-        "name": "SCAN.MA",
-        "slug": "scan-ma",
-        "version": "1.0.0",
-        "orientation": "portrait",
-        "icon": "./assets/images/icon.png",
-        "userInterfaceStyle": "automatic",
-        "newArchEnabled": true,
-        "splash": {
-            "image": "./assets/images/splash-icon.png",
-            "resizeMode": "contain",
-            "backgroundColor": "#ffffff"
-        },
-        "ios": {
-            "supportsTablet": true,
-            "bundleIdentifier": "com.anonymous.scanma",
-            "infoPlist": {
-                "NSCameraUsageDescription": "SCAN.MA a besoin d'accéder à votre caméra pour scanner les codes-barres.",
-                "NSLocationWhenInUseUsageDescription": "SCAN.MA utilise votre position pour trouver les magasins les plus proches."
-            }
-        },
-        "android": {
-            "adaptiveIcon": {
-                "foregroundImage": "./assets/images/android-icon-foreground.png",
-                "backgroundColor": "#ffffff"
-            },
-            "package": "com.anonymous.scanma",
-            "permissions": [
-                "android.permission.CAMERA",
-                "android.permission.ACCESS_COARSE_LOCATION",
-                "android.permission.ACCESS_FINE_LOCATION"
-            ]
-        },
-        "web": {
-            "favicon": "./assets/images/favicon.png"
-        },
-        "plugins": [
-            [
-                "expo-camera",
-                {
-                    "cameraPermission": "Allow SCAN.MA to access your camera"
-                }
-            ],
-            [
-                "expo-location",
-                {
-                    "locationAlwaysAndWhenInUsePermission": "Allow SCAN.MA to use your location."
-                }
-            ]
-        ]
+  "expo": {
+    "name": "SCAN.MA",
+    "slug": "scan-ma",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.scanma",
+      "infoPlist": {
+        "NSCameraUsageDescription": "SCAN.MA a besoin d'accéder à votre caméra pour scanner les codes-barres.",
+        "NSLocationWhenInUseUsageDescription": "SCAN.MA utilise votre position pour trouver les magasins les plus proches."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.anonymous.scanma",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow SCAN.MA to access your camera"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow SCAN.MA to use your location."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f3459309-45b1-4544-b424-7b4f4199671c"
+      }
     }
+  }
 }

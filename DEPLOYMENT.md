@@ -66,6 +66,16 @@ Le lien d'Expo expire après un moment. Pour garder ton fichier "à vie" :
 
 ---
 
+## 🍎 Et pour iPhone (iOS) ?
+⚠️ **Attention :** Le lien ci-dessus (`.apk`) **ne marche QUE sur Android**.
+Apple est beaucoup plus strict que Google. Pour installer une application sur iPhone sans passer par l'ordinateur, il y a deux conditions :
+1.  Payer l'abonnement **Apple Developer** (99$ / an).
+2.  Utiliser **TestFlight** (l'outil de test d'Apple).
+
+**Sans payer les 99$**, la seule façon d'utiliser l'app sur iPhone est de garder ton PC allumé et d'utiliser **Expo Go** (comme pendant le développement).
+
+---
+
 ## Résumé
 | Méthode | Avantage | Inconvénient | Outil |
 | :--- | :--- | :--- | :--- |

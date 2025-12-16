@@ -1,11 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { Alert, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { Alert, Image, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useCart } from '../context/CartContext';
 import { useLocation } from '../context/LocationContext';
 import { useProducts } from '../context/ProductContext';
 import { theme } from '../styles/theme';
+// Only import MapView on native to avoid web crash
+let MapView, Marker, PROVIDER_GOOGLE;
+if (Platform.OS !== 'web') {
+    const Maps = require('react-native-maps');
+    MapView = Maps.default;
+    Marker = Maps.Marker;
+    PROVIDER_GOOGLE = Maps.PROVIDER_GOOGLE;
+}
 
 // Reusable Price Row with functionality
 const PriceRow = ({ storeName, price, oldPrice, distance, coordinates, onDelete }) => {
@@ -225,8 +232,8 @@ const ProductDetailScreen = ({ route, navigation }) => {
                     )}
                 </View>
 
-                {/* Map Preview */}
-                {bestOffer && bestOffer.coordinates && (
+                {/* Map Preview - Native Only */}
+                {Platform.OS !== 'web' && bestOffer && bestOffer.coordinates && (
                     <>
                         <Text style={styles.sectionTitle}>Disponibilité</Text>
                         <View style={styles.mapContainer}>
@@ -252,6 +259,22 @@ const ProductDetailScreen = ({ route, navigation }) => {
                                     )
                                 ))}
                             </MapView>
+                        </View>
+                    </>
+                )}
+                {Platform.OS === 'web' && bestOffer && (
+                    <>
+                        <Text style={styles.sectionTitle}>Disponibilité</Text>
+                        <View style={[styles.mapContainer, { justifyContent: 'center', alignItems: 'center', backgroundColor: '#e1e1e1' }]}>
+                            <Text style={{ color: '#666' }}>Carte non disponible sur le web</Text>
+                            <TouchableOpacity onPress={() => {
+                                if (bestOffer.coordinates) {
+                                    const url = `https://www.google.com/maps/search/?api=1&query=${bestOffer.coordinates.lat},${bestOffer.coordinates.lng}`;
+                                    Linking.openURL(url);
+                                }
+                            }}>
+                                <Text style={{ color: theme.colors.primary, marginTop: 8, fontWeight: 'bold' }}>Ouvrir Google Maps ↗️</Text>
+                            </TouchableOpacity>
                         </View>
                     </>
                 )}
