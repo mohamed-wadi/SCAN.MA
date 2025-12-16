@@ -5,21 +5,23 @@ import CategoryCard from '../components/CategoryCard';
 import ProductCard from '../components/ProductCard';
 import ScanButton from '../components/ScanButton';
 import SearchBar from '../components/SearchBar';
+import { useProducts } from '../context/ProductContext';
 import { categories } from '../data/categories';
-import { PRODUCTS } from '../data/products';
 import { theme } from '../styles/theme';
 
 const HomeScreen = ({ navigation }) => {
+    const { products } = useProducts();
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Memoize filtered products (for search) - simplified logic
+    // Memoize filtered products (for search)
     const filteredProducts = useMemo(() => {
-        if (!searchQuery) return PRODUCTS.slice(0, 50); // Show top 50 by default
-        return PRODUCTS.filter(p =>
+        if (!searchQuery) return products.slice(0, 50); // Show top 50 by default
+        return products.filter(p =>
             p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.brand.toLowerCase().includes(searchQuery.toLowerCase())
+            p.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (p.barcode && p.barcode.includes(searchQuery))
         ).slice(0, 50);
-    }, [searchQuery]);
+    }, [searchQuery, products]);
 
     const renderCategory = useCallback(({ item }) => (
         <CategoryCard category={item} onPress={() => { }} />

@@ -1,11 +1,12 @@
 
 import { Ionicons } from '@expo/vector-icons';
-import { Image, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import React from 'react';
+import { Image, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { LineChart } from "react-native-chart-kit";
 import { useTheme } from '../context/ThemeContext';
 
-const SettingsItem = ({ icon, label, value, isSwitch, onValueChange, theme }) => (
-    <View style={styles.settingItem}>
+const SettingsItem = ({ icon, label, value, isSwitch, onValueChange, theme, onPress }) => (
+    <TouchableOpacity onPress={onPress} disabled={isSwitch} style={styles.settingItem}>
         <View style={styles.settingLeft}>
             <View style={[styles.iconContainer, { backgroundColor: theme.colors.background }]}>
                 <Ionicons name={icon} size={20} color={theme.colors.primary} />
@@ -22,11 +23,21 @@ const SettingsItem = ({ icon, label, value, isSwitch, onValueChange, theme }) =>
         ) : (
             <Ionicons name="chevron-forward" size={20} color={theme.colors.textSecondary} />
         )}
-    </View>
+    </TouchableOpacity>
 );
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
     const theme = useTheme();
+    const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
+
+    const handleLogout = () => {
+        // Implement logout logic here
+        alert("Déconnexion réussie !");
+    };
+
+    const handleNotificationsToggle = () => {
+        setNotificationsEnabled(prev => !prev);
+    };
 
     // Mock data for chart
     const data = [
@@ -125,17 +136,26 @@ const ProfileScreen = () => {
                         icon="notifications"
                         label="Notifications"
                         isSwitch
-                        value={true}
-                        onValueChange={() => { }}
+                        value={notificationsEnabled}
+                        onValueChange={handleNotificationsToggle}
                         theme={theme}
                     />
                 </View>
 
                 <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Compte</Text>
                 <View style={[styles.section, { backgroundColor: theme.colors.card }]}>
-                    <SettingsItem icon="person" label="Profil" theme={theme} />
-                    <SettingsItem icon="card" label="Méthodes de paiement" theme={theme} />
-                    <SettingsItem icon="log-out" label="Déconnexion" theme={theme} />
+                    <SettingsItem
+                        icon="person"
+                        label="Profil"
+                        theme={theme}
+                        onPress={() => navigation.navigate('EditProfile')} // Example
+                    />
+                    <SettingsItem
+                        icon="log-out"
+                        label="Déconnexion"
+                        theme={theme}
+                        onPress={handleLogout}
+                    />
                 </View>
             </ScrollView>
         </View>

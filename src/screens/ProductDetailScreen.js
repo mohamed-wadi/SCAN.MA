@@ -1,34 +1,143 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { Alert, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useCart } from '../context/CartContext';
+import { useLocation } from '../context/LocationContext';
+import { useProducts } from '../context/ProductContext';
 import { theme } from '../styles/theme';
 
-// Reusable Price Row
-const PriceRow = ({ store, price, oldPrice, distance }) => (
-    <View style={styles.priceRow}>
-        <View style={styles.storeInfo}>
-            <Text style={styles.storeName}>{store}</Text>
-            <Text style={styles.storeDistance}>{distance} km</Text>
-        </View>
-        <View style={styles.priceInfo}>
-            <Text style={styles.price}>{price.toFixed(2)} DH</Text>
-            {oldPrice && <Text style={styles.oldPrice}>{oldPrice.toFixed(2)} DH</Text>}
-        </View>
-    </View>
-);
+// Reusable Price Row with functionality
+const PriceRow = ({ storeName, price, oldPrice, distance, coordinates, onDelete }) => {
+    const handleItinerary = () => {
+        if (coordinates) {
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${coordinates.lat},${coordinates.lng}`;
+            Linking.openURL(url);
+        } else {
+            Alert.alert("Erreur", "Coordonnées du magasin indisponibles.");
+        }
+    };
+
+    return (
+        <TouchableOpacity
+            style={styles.priceRow}
+            onLongPress={onDelete}
+            activeOpacity={0.7}
+            delayLongPress={500}
+        >
+            <View style={styles.storeInfo}>
+                <Text style={styles.storeName} numberOfLines={2}>{storeName}</Text>
+                <Text style={styles.storeDistance}>{distance ? `${distance} km` : '--'}</Text>
+            </View>
+            <View style={styles.priceInfoContainer}>
+                <View style={styles.priceInfo}>
+                    <Text style={styles.price}>{price.toFixed(2)} DH</Text>
+                    {oldPrice && <Text style={styles.oldPrice}>{oldPrice.toFixed(2)} DH</Text>}
+                </View>
+                <TouchableOpacity style={styles.dirButton} onPress={handleItinerary}>
+                    <Ionicons name="navigate-circle" size={32} color={theme.colors.primary} />
+                </TouchableOpacity>
+            </View>
+        </TouchableOpacity>
+    );
+};
 
 const ProductDetailScreen = ({ route, navigation }) => {
-    const { product } = route.params;
+    const { product: initialProduct } = route.params;
     const { addToCart } = useCart();
+    const { sortedStores } = useLocation();
+    const { getProductByBarcode, deleteProduct, updateProductImage, removePriceFromProduct } = useProducts();
 
-    // Sort prices by price asc
-    const sortedPrices = [...product.prices].sort((a, b) => a.price - b.price);
-    const bestOffer = sortedPrices[0];
+    // Get fresh product data from context to see updates immediately
+    const product = getProductByBarcode(initialProduct.barcode) || initialProduct;
+
+    // Enhance prices with real-time distance from LocationContext
+    const enhancedPrices = (product.prices || []).map(p => {
+        const storeDetails = sortedStores.find(s => s.name === p.store || s.brand === p.store);
+        return {
+            ...p,
+            distance: storeDetails ? storeDetails.distance : null,
+            valDistance: storeDetails ? storeDetails.distanceValue : 999999,
+            coordinates: storeDetails ? { lat: storeDetails.latitude, lng: storeDetails.longitude } : p.coordinates
+        };
+    });
+
+    const sortedByDistance = [...enhancedPrices].sort((a, b) => a.valDistance - b.valDistance);
+    const bestOffer = [...enhancedPrices].sort((a, b) => a.price - b.price)[0];
 
     const handleAddToCart = () => {
         addToCart(product);
         Alert.alert('Succès', 'Produit ajouté à votre liste !');
+    };
+
+    const handleDeleteProduct = () => {
+        Alert.alert(
+            "Supprimer le produit",
+            "Êtes-vous sûr de vouloir supprimer ce produit définitivement ?",
+            [
+                { text: "Annuler", style: "cancel" },
+                {
+                    text: "Supprimer",
+                    style: "destructive",
+                    onPress: () => {
+                        deleteProduct(product.barcode);
+                        navigation.goBack();
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleChangeImage = async () => {
+        Alert.alert(
+            "Changer l'image",
+            "Choisissez une source",
+            [
+                { text: "Annuler", style: "cancel" },
+                {
+                    text: "Galerie",
+                    onPress: async () => {
+                        const result = await ImagePicker.launchImageLibraryAsync({
+                            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                            allowsEditing: true,
+                            aspect: [1, 1],
+                            quality: 0.5,
+                        });
+                        if (!result.canceled) {
+                            updateProductImage(product.barcode, result.assets[0].uri);
+                        }
+                    }
+                },
+                {
+                    text: "Caméra",
+                    onPress: async () => {
+                        const result = await ImagePicker.launchCameraAsync({
+                            allowsEditing: true,
+                            aspect: [1, 1],
+                            quality: 0.5,
+                        });
+                        if (!result.canceled) {
+                            updateProductImage(product.barcode, result.assets[0].uri);
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    const confirmDeletePrice = (storeName) => {
+        Alert.alert(
+            "Supprimer le prix",
+            `Supprimer le prix pour ${storeName} ?`,
+            [
+                { text: "Annuler", style: "cancel" },
+                {
+                    text: "Supprimer",
+                    style: "destructive",
+                    onPress: () => removePriceFromProduct(product.barcode, storeName)
+                }
+            ]
+        );
     };
 
     return (
@@ -38,71 +147,129 @@ const ProductDetailScreen = ({ route, navigation }) => {
                 <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
                     <Ionicons name="close" size={24} color="#000" />
                 </TouchableOpacity>
-                <Text style={styles.emoji}>{product.image}</Text>
+
+                <TouchableOpacity onPress={handleChangeImage} activeOpacity={0.8} style={styles.imageWrapper}>
+                    {product.isCustomImage ? (
+                        <Image source={{ uri: product.image }} style={styles.productImage} resizeMode="contain" />
+                    ) : (
+                        <Text style={styles.emoji}>{product.image}</Text>
+                    )}
+                    <View style={styles.editIconContainer}>
+                        <Ionicons name="pencil" size={16} color="#fff" />
+                    </View>
+                </TouchableOpacity>
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
                 {/* Basic Info */}
                 <View style={styles.headerInfo}>
-                    <Text style={styles.brand}>{product.brand}</Text>
-                    <Text style={styles.name}>{product.name}</Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.brand}>{product.brand}</Text>
+                            <Text style={styles.name}>{product.name}</Text>
+                        </View>
+                        <TouchableOpacity onPress={handleDeleteProduct} style={styles.deleteButtonHeader}>
+                            <Ionicons name="trash-outline" size={24} color={theme.colors.danger} />
+                        </TouchableOpacity>
+                    </View>
                     <Text style={styles.category}>{product.category}</Text>
                 </View>
 
                 {/* Best Price Highlight */}
-                <View style={styles.highlightCard}>
-                    <View>
-                        <Text style={styles.highlightLabel}>Meilleur prix chez</Text>
-                        <Text style={styles.highlightStore}>{bestOffer.store}</Text>
+                {bestOffer && (
+                    <View style={styles.highlightCard}>
+                        <View>
+                            <Text style={styles.highlightLabel}>Meilleur prix chez</Text>
+                            <Text style={styles.highlightStore}>{bestOffer.store}</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                            <Text style={styles.highlightPrice}>{bestOffer.price.toFixed(2)} DH</Text>
+                            <TouchableOpacity
+                                style={styles.highlightItinerary}
+                                onPress={() => {
+                                    if (bestOffer.coordinates) {
+                                        const url = `https://www.google.com/maps/dir/?api=1&destination=${bestOffer.coordinates.lat},${bestOffer.coordinates.lng}`;
+                                        Linking.openURL(url);
+                                    } else {
+                                        Alert.alert("Erreur", "Coordonnées indisponibles.");
+                                    }
+                                }}
+                            >
+                                <Ionicons name="navigate-circle" size={32} color="#fff" />
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                    <Text style={styles.highlightPrice}>{bestOffer.price.toFixed(2)} DH</Text>
-                </View>
+                )}
 
                 {/* Price Comparison Table */}
-                <Text style={styles.sectionTitle}>Comparateur de prix</Text>
+                <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>Comparateur</Text>
+                    <TouchableOpacity onPress={() => navigation.navigate('AddPrice', { product })}>
+                        <Text style={styles.addPriceText}>+ Prix</Text>
+                    </TouchableOpacity>
+                </View>
+                <Text style={styles.hintText}>Appuyez longuement sur un prix pour le supprimer</Text>
                 <View style={styles.pricesContainer}>
-                    {sortedPrices.map((p, idx) => (
+                    {sortedByDistance.length > 0 ? sortedByDistance.map((p, idx) => (
                         <PriceRow
                             key={idx}
-                            store={p.store}
+                            storeName={p.store}
                             price={p.price}
                             oldPrice={p.oldPrice}
                             distance={p.distance}
+                            coordinates={p.coordinates}
+                            onDelete={() => confirmDeletePrice(p.store)}
                         />
-                    ))}
+                    )) : (
+                        <Text style={{ textAlign: 'center', color: theme.colors.textSecondary, padding: 20 }}>Aucun prix enregistré</Text>
+                    )}
                 </View>
 
                 {/* Map Preview */}
-                <Text style={styles.sectionTitle}>Disponibilité à proximité</Text>
-                <View style={styles.mapContainer}>
-                    <MapView
-                        style={styles.map}
-                        initialRegion={{
-                            latitude: bestOffer.coordinates.lat,
-                            longitude: bestOffer.coordinates.lng,
-                            latitudeDelta: 0.05,
-                            longitudeDelta: 0.05,
-                        }}
-                        provider={PROVIDER_GOOGLE}
-                        scrollEnabled={false}
-                    >
-                        {sortedPrices.map((p, idx) => (
-                            <Marker
-                                key={idx}
-                                coordinate={{ latitude: p.coordinates.lat, longitude: p.coordinates.lng }}
-                                title={p.store}
-                                description={`${p.price} DH`}
-                            />
-                        ))}
-                    </MapView>
-                </View>
+                {bestOffer && bestOffer.coordinates && (
+                    <>
+                        <Text style={styles.sectionTitle}>Disponibilité</Text>
+                        <View style={styles.mapContainer}>
+                            <MapView
+                                style={styles.map}
+                                initialRegion={{
+                                    latitude: bestOffer.coordinates.lat,
+                                    longitude: bestOffer.coordinates.lng,
+                                    latitudeDelta: 0.1,
+                                    longitudeDelta: 0.1,
+                                }}
+                                provider={PROVIDER_GOOGLE}
+                                scrollEnabled={false}
+                            >
+                                {sortedByDistance.map((p, idx) => (
+                                    p.coordinates && (
+                                        <Marker
+                                            key={idx}
+                                            coordinate={{ latitude: p.coordinates.lat, longitude: p.coordinates.lng }}
+                                            title={p.store}
+                                            description={`${p.price} DH`}
+                                        />
+                                    )
+                                ))}
+                            </MapView>
+                        </View>
+                    </>
+                )}
             </ScrollView>
 
             {/* Footer Actions */}
             <View style={styles.footer}>
-                <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
-                    <Text style={styles.addButtonText}>Ajouter à ma liste</Text>
-                </TouchableOpacity>
+                <View style={styles.footerButtons}>
+                    <TouchableOpacity
+                        style={[styles.addButton, styles.outlineButton]}
+                        onPress={() => navigation.navigate('AddPrice', { product })}
+                    >
+                        <Text style={[styles.addButtonText, styles.outlineButtonText]}>Ajouter un prix</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
+                        <Text style={styles.addButtonText}>Ajouter à ma liste</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
     );
@@ -120,17 +287,35 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         position: 'relative',
     },
+    imageWrapper: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    editIconContainer: {
+        position: 'absolute',
+        bottom: 0,
+        right: -10,
+        backgroundColor: theme.colors.primary,
+        padding: 6,
+        borderRadius: 15,
+        borderWidth: 2,
+        borderColor: '#fff',
+    },
     closeButton: {
         position: 'absolute',
         top: 50,
         right: 20,
         zIndex: 10,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#f5f5f5', // Slightly visible bg
         padding: 8,
         borderRadius: 20,
     },
     emoji: {
         fontSize: 100,
+    },
+    productImage: {
+        width: 200, // Fixed width/height for better control or responsive pct
+        height: 200,
     },
     content: {
         padding: theme.spacing.l,
@@ -140,17 +325,22 @@ const styles = StyleSheet.create({
         marginBottom: theme.spacing.l,
     },
     brand: {
-        fontSize: 16,
+        fontSize: theme.typography.body.fontSize,
         color: theme.colors.textSecondary,
         marginBottom: 4,
     },
     name: {
-        ...theme.typography.h2,
+        fontSize: theme.typography.h2.fontSize,
+        fontWeight: 'bold',
         color: theme.colors.text,
         marginBottom: 8,
+        flexWrap: 'wrap',
+    },
+    deleteButtonHeader: {
+        padding: 8,
     },
     category: {
-        fontSize: 14,
+        fontSize: theme.typography.caption.fontSize,
         color: theme.colors.primary,
         fontWeight: '600',
         backgroundColor: theme.colors.primary + '10',
@@ -171,21 +361,39 @@ const styles = StyleSheet.create({
     },
     highlightLabel: {
         color: 'rgba(255,255,255,0.8)',
-        fontSize: 12,
+        fontSize: theme.typography.caption.fontSize,
     },
     highlightStore: {
         color: '#fff',
-        fontSize: 18,
+        fontSize: theme.typography.h3.fontSize,
         fontWeight: 'bold',
     },
     highlightPrice: {
         color: '#fff',
-        fontSize: 24,
+        fontSize: theme.typography.h2.fontSize,
         fontWeight: 'bold',
     },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: theme.spacing.s,
+    },
     sectionTitle: {
-        ...theme.typography.h3,
-        marginBottom: theme.spacing.m,
+        fontSize: theme.typography.h3.fontSize,
+        fontWeight: 'bold',
+        color: theme.colors.text,
+    },
+    addPriceText: {
+        color: theme.colors.primary,
+        fontWeight: 'bold',
+        fontSize: theme.typography.body.fontSize,
+    },
+    hintText: {
+        fontSize: 10,
+        color: theme.colors.textSecondary,
+        marginBottom: 8,
+        fontStyle: 'italic',
     },
     pricesContainer: {
         backgroundColor: '#fff',
@@ -203,24 +411,33 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#f0f0f0',
     },
+    storeInfo: {
+        flex: 1,
+        marginRight: 10,
+    },
     storeName: {
-        fontSize: 16,
+        fontSize: theme.typography.body.fontSize,
         fontWeight: '600',
     },
     storeDistance: {
-        fontSize: 12,
+        fontSize: theme.typography.caption.fontSize,
         color: theme.colors.textSecondary,
+    },
+    priceInfoContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     priceInfo: {
         alignItems: 'flex-end',
+        marginRight: 10,
     },
     price: {
-        fontSize: 16,
+        fontSize: theme.typography.body.fontSize,
         fontWeight: 'bold',
         color: theme.colors.text,
     },
     oldPrice: {
-        fontSize: 12,
+        fontSize: theme.typography.caption.fontSize,
         textDecorationLine: 'line-through',
         color: theme.colors.textSecondary,
     },
@@ -244,16 +461,29 @@ const styles = StyleSheet.create({
         borderTopColor: '#eee',
         paddingBottom: 30, // Safe area
     },
+    footerButtons: {
+        flexDirection: 'row',
+        gap: 12,
+    },
     addButton: {
         backgroundColor: theme.colors.primary,
         paddingVertical: 16,
         borderRadius: theme.borderRadius.full,
         alignItems: 'center',
         borderRadius: 16,
+        flex: 1,
+    },
+    outlineButton: {
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: theme.colors.primary,
+    },
+    outlineButtonText: {
+        color: theme.colors.primary,
     },
     addButtonText: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: theme.typography.button.fontSize,
         fontWeight: 'bold',
     },
 });

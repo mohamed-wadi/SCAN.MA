@@ -5,18 +5,24 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { CartProvider } from './src/context/CartContext';
 import AppNavigator from './src/navigation/AppNavigator';
 
+import { LocationProvider } from './src/context/LocationContext';
+import { ProductProvider } from './src/context/ProductContext';
 import { ThemeProvider } from './src/context/ThemeContext';
 
 export default function App() {
     return (
         <SafeAreaProvider>
             <ThemeProvider>
-                <CartProvider>
-                    <NavigationContainer>
-                        <StatusBar style="auto" />
-                        <AppNavigator />
-                    </NavigationContainer>
-                </CartProvider>
+                <LocationProvider>
+                    <ProductProvider>
+                        <CartProvider>
+                            <NavigationContainer>
+                                <StatusBar style="auto" />
+                                <AppNavigator />
+                            </NavigationContainer>
+                        </CartProvider>
+                    </ProductProvider>
+                </LocationProvider>
             </ThemeProvider>
         </SafeAreaProvider>
     );

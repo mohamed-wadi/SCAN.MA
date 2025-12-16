@@ -1,11 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { FlatList, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useCart } from '../context/CartContext';
-import { stores } from '../data/stores';
 import { theme } from '../styles/theme';
 
-const ListScreen = () => {
-    const { cartItems, removeFromCart, updateQuantity, getCartTotal } = useCart();
+const ListScreen = ({ navigation }) => {
+    const { cartItems, removeFromCart, updateQuantity } = useCart();
 
     const handleShare = async () => {
         try {
@@ -19,7 +18,10 @@ const ListScreen = () => {
     };
 
     const renderItem = ({ item }) => (
-        <View style={styles.itemCard}>
+        <TouchableOpacity
+            style={styles.itemCard}
+            onPress={() => navigation.navigate('ProductDetail', { product: item })}
+        >
             <View style={styles.itemInfo}>
                 <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
                 <Text style={styles.itemBrand}>{item.brand}</Text>
@@ -38,7 +40,7 @@ const ListScreen = () => {
             <TouchableOpacity onPress={() => removeFromCart(item.barcode)} style={styles.deleteButton}>
                 <Ionicons name="trash-outline" size={20} color={theme.colors.danger} />
             </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
     );
 
     return (
@@ -59,29 +61,12 @@ const ListScreen = () => {
                     <Text style={styles.emptySubText}>Ajoutez des produits pour comparer les prix</Text>
                 </View>
             ) : (
-                <>
-                    <FlatList
-                        data={cartItems}
-                        renderItem={renderItem}
-                        keyExtractor={item => item.barcode}
-                        contentContainerStyle={styles.list}
-                    />
-
-                    <View style={styles.summary}>
-                        <Text style={styles.summaryTitle}>Estimations par magasin :</Text>
-                        {stores.slice(0, 3).map(store => {
-                            const total = getCartTotal(store.id);
-                            return (
-                                <View key={store.id} style={styles.storeTotal}>
-                                    <Text>{store.name} ({store.address.split(',')[0]})</Text>
-                                    <Text style={{ fontWeight: 'bold', color: theme.colors.primary }}>
-                                        {total.toFixed(2)} DH
-                                    </Text>
-                                </View>
-                            );
-                        })}
-                    </View>
-                </>
+                <FlatList
+                    data={cartItems}
+                    renderItem={renderItem}
+                    keyExtractor={item => item.barcode}
+                    contentContainerStyle={styles.list}
+                />
             )}
         </View>
     );

@@ -2,6 +2,7 @@ export const stores = [
     {
         id: 'marjane_maarif',
         name: 'Marjane',
+        name: 'Marjane Maarif',
         brand: 'Marjane',
         address: 'Boulevard Zerktouni, Maarif, Casablanca',
         latitude: 33.5731,
@@ -11,7 +12,7 @@ export const stores = [
     },
     {
         id: 'marjane_californie',
-        name: 'Marjane',
+        name: 'Marjane Californie',
         brand: 'Marjane',
         address: 'Bouskoura, Casablanca',
         latitude: 33.5333,
@@ -20,8 +21,18 @@ export const stores = [
         logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Marjane_Logo.svg/1200px-Marjane_Logo.svg.png',
     },
     {
+        id: 'marjane_ain_sebaa',
+        name: 'Marjane Ain Sebaa',
+        brand: 'Marjane',
+        address: 'Route de Rabat, Ain Sebaa, Casablanca',
+        latitude: 33.6060,
+        longitude: -7.5300,
+        color: '#0055A4',
+        logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Marjane_Logo.svg/1200px-Marjane_Logo.svg.png',
+    },
+    {
         id: 'marjane_morocco_mall',
-        name: 'Marjane',
+        name: 'Marjane Morocco Mall',
         brand: 'Marjane',
         address: 'Morocco Mall, Ain Diab, Casablanca',
         latitude: 33.5758,
@@ -31,7 +42,7 @@ export const stores = [
     },
     {
         id: 'carrefour_sidi_maarouf',
-        name: 'Carrefour',
+        name: 'Carrefour Sidi Maarouf',
         brand: 'Carrefour',
         address: 'Sidi Maarouf, Casablanca',
         latitude: 33.5435,
@@ -41,7 +52,7 @@ export const stores = [
     },
     {
         id: 'carrefour_gourmet',
-        name: 'Carrefour Gourmet',
+        name: 'Carrefour Gourmet Vélodrome',
         brand: 'Carrefour',
         address: 'Velodrome, Casablanca',
         latitude: 33.5855,
@@ -51,7 +62,7 @@ export const stores = [
     },
     {
         id: 'acima_inara',
-        name: 'Acima',
+        name: 'Acima Inara',
         brand: 'Acima',
         address: 'Inara, Casablanca',
         latitude: 33.5601,
@@ -61,7 +72,7 @@ export const stores = [
     },
     {
         id: 'bim_adrar',
-        name: 'BIM',
+        name: 'BIM Adrar',
         brand: 'BIM',
         address: 'Bd Al Qods, Casablanca',
         latitude: 33.5511,
@@ -71,7 +82,7 @@ export const stores = [
     },
     {
         id: 'aswak_assalam',
-        name: 'Aswak Assalam',
+        name: 'Aswak Assalam Oulad Ziane',
         brand: 'Aswak Assalam',
         address: 'Olad Ziane, Casablanca',
         latitude: 33.5700,

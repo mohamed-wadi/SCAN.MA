@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 // import { Camera, CameraView } from 'expo-camera'; // Camera deprecated
+import { useFocusEffect } from '@react-navigation/native';
+import { Audio } from 'expo-av';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useEffect, useState } from 'react';
-import { Button, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { PRODUCTS } from '../data/products';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, Button, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useProducts } from '../context/ProductContext';
 import { theme } from '../styles/theme';
 
 const { width } = Dimensions.get('window');
@@ -12,6 +14,45 @@ const SCAN_SIZE = width * 0.7;
 export default function ScanScreen({ navigation }) {
     const [permission, requestPermission] = useCameraPermissions();
     const [scanned, setScanned] = useState(false);
+    const { getProductByBarcode } = useProducts();
+    const [sound, setSound] = useState();
+    const lastScanRef = useRef(0); // Throttle ref
+
+    async function playScanSound() {
+        console.log('Loading Sound');
+        try {
+            const { sound } = await Audio.Sound.createAsync(
+                // Short beep sound (hosted or requiring local asset). 
+                // For now, using a generic online notification sound or creating a very short one is hard.
+                // We will use a reliable public URL for a short beep.
+                { uri: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg' }
+            );
+            setSound(sound);
+            console.log('Playing Sound');
+            await sound.playAsync();
+        } catch (error) {
+            console.log('Error playing sound', error);
+        }
+    }
+
+    useEffect(() => {
+        return sound
+            ? () => {
+                console.log('Unloading Sound');
+                sound.unloadAsync();
+            }
+            : undefined;
+    }, [sound]);
+
+    useFocusEffect(
+        useCallback(() => {
+            // Met un délai avant de réactiver le scanner pour éviter de rescanner immédiatement en revenant
+            const timer = setTimeout(() => {
+                setScanned(false);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }, [])
+    );
 
     useEffect(() => {
         if (!permission) {
@@ -20,18 +61,47 @@ export default function ScanScreen({ navigation }) {
     }, [permission]);
 
     const handleBarCodeScanned = ({ type, data }) => {
+        const now = Date.now();
+        // Prevent double scan if already scanned or if less than 5s passed since last scan
+        if (scanned || (now - lastScanRef.current < 5000)) return;
+
+        lastScanRef.current = now;
         setScanned(true);
+        playScanSound(); // Play beep
+
         // Find product in DB or show "Product Not Found"
-        const product = PRODUCTS.find(p => p.barcode === data);
+        const product = getProductByBarcode(data);
 
         if (product) {
             navigation.navigate('ProductDetail', { product });
+            // Re-enable scan when coming back is handled by useFocusEffect usually, 
+            // but here we just wait a bit or let user reset. 
+            // Easier: setScanned(false) only when coming back via listener
         } else {
-            alert(`Produit non trouvé : ${data}`);
+            Alert.alert(
+                "Produit inconnu",
+                `Le code ${data} n'existe pas encore. Voulez-vous l'ajouter ? `,
+                [
+                    {
+                        text: "Annuler",
+                        onPress: () => {
+                            // Delay re-enabling scan logic is handled by the throttle/focus effect mostly, 
+                            // but explicit setScanned(false) with delay is good here too.
+                            setTimeout(() => setScanned(false), 2000);
+                        },
+                        style: "cancel"
+                    },
+                    {
+                        text: "Ajouter",
+                        onPress: () => {
+                            navigation.navigate('AddProduct', { barcode: data });
+                            // We keep scanned=true so it doesn't scan while navigating
+                            // Resetting it will happen when returning or manually
+                        }
+                    }
+                ]
+            );
         }
-
-        // Reset scan after delay
-        setTimeout(() => setScanned(false), 2000);
     };
 
     if (!permission) {

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { memo } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { theme } from '../styles/theme';
 
@@ -15,7 +15,11 @@ const ProductCard = ({ product, onPress, index = 0 }) => {
                 activeOpacity={0.8}
             >
                 <View style={styles.imageContainer}>
-                    <Text style={styles.emojiImage}>{product.image}</Text>
+                    {product.isCustomImage ? (
+                        <Image source={{ uri: product.image }} style={styles.thumbnailImage} resizeMode="contain" />
+                    ) : (
+                        <Text style={styles.emojiImage}>{product.image}</Text>
+                    )}
                 </View>
 
                 <View style={styles.infoContainer}>
@@ -59,6 +63,11 @@ const styles = StyleSheet.create({
         borderRadius: theme.borderRadius.s,
         alignItems: 'center',
         justifyContent: 'center',
+        overflow: 'hidden', // Add overflow hidden for image border radius
+    },
+    thumbnailImage: {
+        width: '90%',
+        height: '90%',
     },
     emojiImage: {
         fontSize: 40,
