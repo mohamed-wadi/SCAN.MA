@@ -4,11 +4,14 @@ import { useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { theme } from '../styles/theme';
 
+import { useUser } from '../context/UserContext';
+
 const EditProfileScreen = ({ navigation }) => {
-    const [name, setName] = useState('Mohammed Amine');
-    const [email, setEmail] = useState('user@example.com');
-    const [phone, setPhone] = useState('+212 600 000 000');
-    const [avatar, setAvatar] = useState('https://ui-avatars.com/api/?name=User+Scan&background=34C759&color=fff');
+    const { user, updateUser } = useUser();
+    const [name, setName] = useState(user.name);
+    const [email, setEmail] = useState(user.email);
+    const [phone, setPhone] = useState(user.phone);
+    const [avatar, setAvatar] = useState(user.avatar);
 
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -30,7 +33,7 @@ const EditProfileScreen = ({ navigation }) => {
     };
 
     const handleSave = () => {
-        // In a real app, update context/backend
+        updateUser({ name, email, phone, avatar });
         Alert.alert('Succès', 'Profil mis à jour !');
         navigation.goBack();
     };

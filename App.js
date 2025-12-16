@@ -9,20 +9,24 @@ import { LocationProvider } from './src/context/LocationContext';
 import { ProductProvider } from './src/context/ProductContext';
 import { ThemeProvider } from './src/context/ThemeContext';
 
+import { UserProvider } from './src/context/UserContext';
+
 export default function App() {
     return (
         <SafeAreaProvider>
             <ThemeProvider>
-                <LocationProvider>
-                    <ProductProvider>
-                        <CartProvider>
-                            <NavigationContainer>
-                                <StatusBar style="auto" />
-                                <AppNavigator />
-                            </NavigationContainer>
-                        </CartProvider>
-                    </ProductProvider>
-                </LocationProvider>
+                <UserProvider>
+                    <LocationProvider>
+                        <ProductProvider>
+                            <CartProvider>
+                                <NavigationContainer>
+                                    <StatusBar style="auto" />
+                                    <AppNavigator />
+                                </NavigationContainer>
+                            </CartProvider>
+                        </ProductProvider>
+                    </LocationProvider>
+                </UserProvider>
             </ThemeProvider>
         </SafeAreaProvider>
     );

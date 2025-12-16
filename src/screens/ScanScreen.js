@@ -6,6 +6,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Button, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useProducts } from '../context/ProductContext';
+import { useUser } from '../context/UserContext';
 import { theme } from '../styles/theme';
 
 const { width } = Dimensions.get('window');
@@ -15,6 +16,7 @@ export default function ScanScreen({ navigation }) {
     const [permission, requestPermission] = useCameraPermissions();
     const [scanned, setScanned] = useState(false);
     const { getProductByBarcode } = useProducts();
+    const { incrementScanCount } = useUser();
     const [sound, setSound] = useState();
     const lastScanRef = useRef(0); // Throttle ref
 
@@ -67,6 +69,7 @@ export default function ScanScreen({ navigation }) {
 
         lastScanRef.current = now;
         setScanned(true);
+        incrementScanCount(); // Track scan stats
         playScanSound(); // Play beep
 
         // Find product in DB or show "Product Not Found"

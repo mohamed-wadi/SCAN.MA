@@ -178,11 +178,11 @@ const ProductDetailScreen = ({ route, navigation }) => {
                 {/* Best Price Highlight */}
                 {bestOffer && (
                     <View style={styles.highlightCard}>
-                        <View>
+                        <View style={{ flex: 1, paddingRight: 8 }}>
                             <Text style={styles.highlightLabel}>Meilleur prix chez</Text>
-                            <Text style={styles.highlightStore}>{bestOffer.store}</Text>
+                            <Text style={styles.highlightStore} numberOfLines={1} adjustsFontSizeToFit>{bestOffer.store}</Text>
                         </View>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                             <Text style={styles.highlightPrice}>{bestOffer.price.toFixed(2)} DH</Text>
                             <TouchableOpacity
                                 style={styles.highlightItinerary}
@@ -195,7 +195,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
                                     }
                                 }}
                             >
-                                <Ionicons name="navigate-circle" size={32} color="#fff" />
+                                <Ionicons name="navigate-circle" size={28} color="#fff" />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -365,12 +365,12 @@ const styles = StyleSheet.create({
     },
     highlightStore: {
         color: '#fff',
-        fontSize: theme.typography.h3.fontSize,
+        fontSize: theme.typography.body.fontSize,
         fontWeight: 'bold',
     },
     highlightPrice: {
         color: '#fff',
-        fontSize: theme.typography.h2.fontSize,
+        fontSize: theme.typography.h3.fontSize,
         fontWeight: 'bold',
     },
     sectionHeader: {

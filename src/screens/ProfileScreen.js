@@ -2,7 +2,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Image, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
-import { LineChart } from "react-native-chart-kit";
 import { useTheme } from '../context/ThemeContext';
 
 const SettingsItem = ({ icon, label, value, isSwitch, onValueChange, theme, onPress }) => (
@@ -26,8 +25,16 @@ const SettingsItem = ({ icon, label, value, isSwitch, onValueChange, theme, onPr
     </TouchableOpacity>
 );
 
+import { useCart } from '../context/CartContext';
+import { useUser } from '../context/UserContext';
+// import { LineChart } from "react-native-chart-kit"; // Removed
+
+// ... (SettingsItem remains the same)
+
 const ProfileScreen = ({ navigation }) => {
     const theme = useTheme();
+    const { user } = useUser(); // Get user from context
+    const { cartItems } = useCart(); // Get cart items for count
     const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
 
     const handleLogout = () => {
@@ -39,89 +46,34 @@ const ProfileScreen = ({ navigation }) => {
         setNotificationsEnabled(prev => !prev);
     };
 
-    // Mock data for chart
-    const data = [
-        { x: 1, y: 20 },
-        { x: 2, y: 45 },
-        { x: 3, y: 30 },
-        { x: 4, y: 80 },
-        { x: 5, y: 50 },
-        { x: 6, y: 120 },
-    ];
-
     return (
         <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
             <View style={[styles.header, { backgroundColor: theme.colors.card, ...theme.shadows.medium }]}>
                 <View style={styles.avatarContainer}>
                     <Image
-                        source={{ uri: 'https://ui-avatars.com/api/?name=User+Scan&background=34C759&color=fff' }}
+                        source={{ uri: user.avatar }}
                         style={styles.avatar}
                     />
                 </View>
-                <Text style={[styles.name, { color: theme.colors.text }]}>Mohammed Amine</Text>
-                <Text style={[styles.stats, { color: theme.colors.textSecondary }]}>Membre depuis 2024</Text>
+                <Text style={[styles.name, { color: theme.colors.text }]}>{user.name}</Text>
+                <Text style={[styles.stats, { color: theme.colors.textSecondary }]}>Membre depuis {user.joinDate}</Text>
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
                 {/* Stats Card */}
                 <View style={[styles.statsCard, { backgroundColor: theme.colors.primary, ...theme.shadows.large }]}>
                     <View style={styles.statItem}>
-                        <Text style={styles.statValue}>1,240 DH</Text>
-                        <Text style={styles.statLabel}>Économies</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                        <Text style={styles.statValue}>45</Text>
+                        <Text style={styles.statValue}>{user.scanCount}</Text>
                         <Text style={styles.statLabel}>Scans</Text>
                     </View>
                     <View style={styles.statDivider} />
                     <View style={styles.statItem}>
-                        <Text style={styles.statValue}>12</Text>
-                        <Text style={styles.statLabel}>Listes</Text>
+                        <Text style={styles.statValue}>{cartItems.length}</Text>
+                        <Text style={styles.statLabel}>Produits en liste</Text>
                     </View>
                 </View>
 
-                {/* Chart Section */}
-                <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Historique des économies</Text>
-                <View style={[styles.chartContainer, { backgroundColor: theme.colors.card, borderRadius: theme.borderRadius.l }]}>
-                    <LineChart
-                        data={{
-                            labels: ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin"],
-                            datasets: [
-                                {
-                                    data: [20, 45, 28, 80, 50, 120]
-                                }
-                            ]
-                        }}
-                        width={320} // from react-native
-                        height={220}
-                        yAxisLabel=""
-                        yAxisSuffix="dh"
-                        yAxisInterval={1}
-                        chartConfig={{
-                            backgroundColor: theme.colors.card,
-                            backgroundGradientFrom: theme.colors.card,
-                            backgroundGradientTo: theme.colors.card,
-                            decimalPlaces: 0,
-                            color: (opacity = 1) => `rgba(52, 199, 89, ${opacity})`,
-                            labelColor: (opacity = 1) => theme.colors.textSecondary,
-                            style: {
-                                borderRadius: 16
-                            },
-                            propsForDots: {
-                                r: "6",
-                                strokeWidth: "2",
-                                stroke: theme.colors.primary
-                            }
-                        }}
-                        bezier
-                        style={{
-                            marginVertical: 8,
-                            borderRadius: 16
-                        }}
-                    />
-                </View>
-
+                {/* Preferences Section */}
                 <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Préférences</Text>
                 <View style={[styles.section, { backgroundColor: theme.colors.card }]}>
                     <SettingsItem
