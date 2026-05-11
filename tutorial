@@ -1,0 +1,323 @@
+🛒 SCAN.MA - GUIDE COMPLET POUR WINDSURF
+
+📋 BRIEF PROJET POUR WINDSURF
+Nom du projet : SCAN.MA
+Type : Application mobile React Native + Expo
+Niveau : Projet 4ème année IIR - EMSI
+Objectif : Application moderne de comparaison de prix des produits marocains
+
+🎯 CONCEPT DÉTAILLÉ
+Problématique :
+Les consommateurs marocains perdent du temps et de l'argent en ne sachant pas où trouver les meilleurs prix. Actuellement, il faut visiter plusieurs magasins ou sites web pour comparer.
+Solution :
+Une application mobile qui permet de scanner un code-barre et voir instantanément les prix dans tous les supermarchés marocains, avec:
+
+Comparaison en temps réel
+Localisation des magasins les plus proches
+Liste de courses intelligente
+Historique des scans
+Alertes de promotions
+
+
+🎨 DESIGN & UX - TRÈS MODERNE
+Palette de couleurs :
+Primaire : #34C759 (Vert - Succès, économie)
+Secondaire : #007AFF (Bleu - Confiance)
+Accent : #FF9500 (Orange - Promotions)
+Danger : #FF3B30 (Rouge - Prix élevé)
+Background : #F2F2F7 (Gris clair)
+Cards : #FFFFFF (Blanc)
+Text : #000000 / #8E8E93 (Noir/Gris)
+Style visuel :
+
+Design iOS moderne (inspiration Apple)
+Glassmorphism (effet verre dépoli)
+Animations fluides (60 FPS)
+Micro-interactions partout
+Dark mode inclus
+Haptic feedback sur iOS
+Skeleton loaders pour le chargement
+
+Typographie :
+Titres : SF Pro Display Bold (24-32px)
+Sous-titres : SF Pro Text Semibold (16-18px)
+Body : SF Pro Text Regular (14-16px)
+Captions : SF Pro Text Regular (12px)
+
+
+
+📊 BASE DE DONNÉES - RICHE EN DATA
+Structure produit :
+javascript{
+  barcode: "6111001100012",
+  name: "Huile d'Olive Extra Vierge Lesieur 1L",
+  brand: "Lesieur",
+  category: "Huiles & Vinaigres",
+  subcategory: "Huiles d'olive",
+  image: "url_ou_emoji",
+  unit: "1L",
+  
+  // Prix par magasin
+  prices: [
+    {
+      store: "Marjane",
+      storeId: "marjane_maarif",
+      price: 45.90,
+      oldPrice: 49.90,        // Prix avant promo
+      discount: 8,             // % réduction
+      lastUpdated: "2024-12-15",
+      inStock: true,
+      distance: 1.2,           // km
+      address: "Boulevard Zerktouni, Maarif",
+      coordinates: { lat: 33.5731, lng: -7.6298 }
+    },
+    // ... autres magasins
+  ],
+  
+  // Métadonnées
+  metadata: {
+    averagePrice: 44.50,
+    lowestPrice: 40.00,
+    highestPrice: 48.00,
+    priceVariation: 20,      // % écart
+    popularityScore: 8.5,    // 0-10
+    reviewCount: 156,
+    rating: 4.3,
+    
+    // Historique prix (30 jours)
+    priceHistory: [
+      { date: "2024-11-15", avgPrice: 46.50 },
+      { date: "2024-12-01", avgPrice: 45.00 },
+      { date: "2024-12-15", avgPrice: 44.50 }
+    ],
+    
+    // Infos nutrition (optionnel)
+    nutrition: {
+      calories: 900,
+      fat: 100,
+      carbs: 0,
+      protein: 0
+    },
+    
+    // Tags
+    tags: ["bio", "promotion", "local", "halal"],
+    
+    // Produits similaires
+    similarProducts: ["6111001100013", "6111001100014"]
+  }
+}
+500+ Produits à inclure :
+Catégories principales (avec 50-100 produits chacune) :
+
+Huiles & Vinaigres (80 produits)
+
+Huile d'olive, tournesol, argan, colza, maïs
+Vinaigres balsamique, cidre, vin
+
+
+Produits Laitiers (100 produits)
+
+Lait (Centrale, Jaouda, Danone)
+Yaourts, fromages, beurre, crème
+
+
+Céréales & Pâtes (70 produits)
+
+Couscous, riz, pâtes, farine, semoule
+
+
+Boissons (90 produits)
+
+Eau, jus, sodas, thé, café
+
+
+Épicerie Sucrée (80 produits)
+
+Confiture, miel, chocolat, biscuits
+
+
+Épicerie Salée (60 produits)
+
+Conserves, sauces, condiments
+
+
+Hygiène & Beauté (70 produits)
+
+Shampooing, savon, dentifrice
+
+
+Entretien (50 produits)
+
+Lessive, vaisselle, nettoyants
+
+
+
+### **Micro-interactions :**
+- Haptic feedback sur boutons
+- Pull-to-refresh avec animation custom
+- Swipe-to-delete sur liste
+- Long-press pour actions rapides
+- Bounce effect sur scroll
+- Shimmer loading sur skeleton
+
+---
+
+## 🚀 **FONCTIONNALITÉS AVANCÉES**
+
+### **1. Scanner Intelligent**
+```
+✅ Scan de codes-barres (EAN-13, UPC)
+✅ Scan de QR codes
+✅ Reconnaissance d'image (futur - ML Kit)
+✅ Scan de reçus (OCR - futur)
+✅ Scan multiple produits
+✅ Historique auto-save
+✅ Cache des scans récents
+```
+
+### **2. Comparaison Prix**
+```
+✅ Tri par prix (croissant/décroissant)
+✅ Tri par distance
+✅ Filtres : en promo, en stock, note >4
+✅ Vue liste / Vue grille
+✅ Graphique évolution prix (30j)
+✅ Alerte baisse de prix
+✅ Estimation économie si achat optimal
+```
+
+### **3. Liste de Courses Intelligente**
+```
+✅ Ajout rapide produits
+✅ Quantités + notes
+✅ Total par magasin
+✅ Suggestion itinéraire optimal
+✅ Partage liste (QR code / Link)
+✅ Liste récurrente (hebdo)
+✅ Catégorisation auto
+```
+
+### **4. Recherche Avancée**
+```
+✅ Recherche nom produit
+✅ Recherche marque
+✅ Recherche par catégorie
+✅ Filtres multi-critères
+✅ Suggestions auto-complete
+✅ Recherche vocale
+✅ Historique recherches
+```
+
+### **5. Profil & Stats**
+```
+✅ Économies totales réalisées
+✅ Nombre de scans
+✅ Produits favoris
+✅ Magasins préférés
+✅ Graphiques stats
+✅ Badges achievements
+✅ Partage sur réseaux sociaux
+```
+
+### **6. Notifications Push**
+```
+✅ Produit en promo dans ta liste
+✅ Baisse de prix produit favori
+✅ Nouveau magasin près de toi
+✅ Rappel liste de courses
+✅ Tips économies hebdo
+
+
+
+```
+Je veux créer une application React Native avec Expo appelée "SCAN.MA" - 
+une app de comparaison de prix des produits marocains.
+
+OBJECTIF :
+Une app moderne, rapide et riche en fonctionnalités qui permet de :
+1. Scanner des codes-barres de produits
+2. Comparer les prix dans différents supermarchés marocains
+3. Gérer une liste de courses
+4. Voir l'historique et les statistiques
+
+EXIGENCES TECHNIQUES :
+
+1. STRUCTURE :
+   - Utilise React Navigation avec Bottom Tabs + Stack
+   - 4 écrans principaux : Accueil, Scanner, Ma Liste, Profil
+   - Architecture components/screens/utils/data bien organisée
+   
+2. DESIGN :
+   - Style iOS moderne (inspiration Apple)
+   - Palette : Vert #34C759 (primaire), Bleu #007AFF (secondaire)
+   - Glassmorphism effects
+   - Dark mode support
+   - Animations fluides (React Native Reanimated)
+   
+3. PERFORMANCE :
+   - Utilise FlashList pour les listes
+   - Memoization avec React.memo, useMemo, useCallback
+   - Lazy loading des images
+   - Cache intelligent (AsyncStorage)
+   - Pagination (20 items à la fois)
+   
+4. FONCTIONNALITÉS :
+   
+   ÉCRAN ACCUEIL :
+   - Header avec logo et recherche
+   - FAB "Scanner" (floating action button)
+   - Scroll horizontal de catégories (avec emojis)
+   - Section "Promotions du jour"
+   - Section "Produits populaires" (FlashList)
+   - Stats utilisateur (économies, scans)
+   
+   ÉCRAN SCANNER :
+   - Caméra plein écran (expo-barcode-scanner)
+   - Overlay avec instructions animées
+   - Animation de scan (cercle pulsant)
+   - Feedback visuel + haptic
+   - Bottom sheet historique scans récents
+   
+   ÉCRAN LISTE :
+   - Liste de courses avec quantités
+   - Total par magasin
+   - Suggestion meilleur itinéraire
+   - Swipe to delete
+   - Partage de liste (QR code)
+   
+   ÉCRAN PROFIL :
+   - Stats (graphiques avec Victory Native)
+   - Économies réalisées
+   - Historique scans
+   - Dark mode toggle
+   - Paramètres
+   
+   ÉCRAN DÉTAILS PRODUIT (Modal) :
+   - Image produit
+   - Nom, marque, catégorie
+   - Comparaison prix (tableau trié)
+   - Graphique évolution prix (30 jours)
+   - Bouton "Ajouter à la liste"
+   - Map des magasins
+   - Avis utilisateurs
+
+5. DATA :
+   
+   Crée une base de données riche avec 500+ produits incluant :
+   
+   CATÉGORIES (8) avec 50-100 produits chacune :
+   - Huiles & Vinaigres
+   - Produits Laitiers
+   - Céréales & Pâtes
+   - Boissons
+   - Épicerie Sucrée
+   - Épicerie Salée
+   - Hygiène & Beauté
+   - Entretien
+   
+   MAGASINS (8) :
+   - Marjane (3 localisations)
+   - Carrefour (2 localisations)
+   - Acima (2 localisations)
+   - BIM (1 localisation)
+   
